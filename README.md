@@ -21,25 +21,22 @@ A collection of Streamlit applications for content analysis and summarization us
 
 ## Running the Streamlit Apps
 
-### 1. YouTube Summarizer (YT Short-Cut)
-Summarize YouTube videos with catchy titles, TL;DR sections, and key takeaways.
+**All 3 apps on one page (recommended)** — one URL, sidebar menu to switch apps:
 
 ```bash
-streamlit run youtube_summarizer.py
+streamlit run streamlit_app.py
 ```
 
-### 2. Website Content Distiller
-Distill website content into executive summaries, LinkedIn posts, ELI5 explanations, and blog posts.
+Then use the **sidebar** to open: **YT Short-Cut**, **Content Distiller**, or **YT Global Short-Cut**. The app opens at `http://localhost:8501`.
+
+---
+
+**Run a single app** (optional):
 
 ```bash
-streamlit run websites_interpreter.py
-```
-
-### 3. YouTube Cultural Translator (YT Global Short-Cut)
-Translate and interpret YouTube videos from any language, perfect for anime, songs, and global content.
-
-```bash
-streamlit run youtube_cultural_translator.py
+streamlit run youtube_summarizer.py      # YT Short-Cut
+streamlit run websites_interpreter.py   # Content Distiller
+streamlit run youtube_cultural_translator.py   # YT Global Short-Cut
 ```
 
 ## Features
