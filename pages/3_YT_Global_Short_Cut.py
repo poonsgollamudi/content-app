@@ -1,13 +1,14 @@
 import streamlit as st
 import os
 import re
-from youtube_transcript_api import YouTubeTranscriptApi
+import requests
 from google import genai
 from dotenv import load_dotenv
 
 # --- Config & API Key ---
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+SUPADATA_API_KEY = os.getenv("SUPADATA_API_KEY")
 
 if not GEMINI_API_KEY:
     st.error("Missing API Key. Please add GEMINI_API_KEY to your .env file.")
@@ -23,28 +24,25 @@ def extract_video_id(url):
 
 def get_youtube_transcript(video_id):
     try:
-        api = YouTubeTranscriptApi()
-        transcript_list = api.list(video_id)
-        try:
-            transcript = transcript_list.find_transcript(['en', 'en-US'])
-        except Exception:
-            transcript = next(iter(transcript_list))
-        transcript_data = transcript.fetch()
-        full_text = ""
-        for segment in transcript_data:
-            if hasattr(segment, 'text'):
-                full_text += segment.text + " "
-            else:
-                full_text += segment.get('text', '') + " "
-        return full_text.strip()
+        response = requests.get(
+            "https://api.supadata.ai/v1/youtube/transcript",
+            headers={"x-api-key": SUPADATA_API_KEY},
+            params={"videoId": video_id, "text": "true"},
+        )
+        response.raise_for_status()
+        data = response.json()
+        content = data.get("content", "")
+        if isinstance(content, list):
+            return " ".join(seg.get("text", "") for seg in content)
+        return content
     except Exception as e:
         return f"Error: {str(e)}"
 
 def summarize_with_gemini(transcript):
     prompt = f"""
-    You are a high-energy content interpreter and cultural expert. 
-    If the following transcript is not in English, first translate the core meaning into English. 
-    
+    You are a high-energy content interpreter and cultural expert.
+    If the following transcript is not in English, first translate the core meaning into English.
+
     If this is a song or anime clip, provide deep interpretation of the themes and lyrics.
 
     Your output must follow this structure:
@@ -65,6 +63,10 @@ def summarize_with_gemini(transcript):
 # --- Streamlit UI ---
 st.title("📺 YT Global Short-Cut")
 st.markdown("### Anime, Songs, and Global Content Distiller.")
+
+if not SUPADATA_API_KEY:
+    st.error("Missing SUPADATA_API_KEY. Please add it to your .env file or Streamlit secrets.")
+    st.stop()
 
 yt_url = st.text_input("Paste YouTube URL:", placeholder="https://www.youtube.com/watch?v=...")
 
